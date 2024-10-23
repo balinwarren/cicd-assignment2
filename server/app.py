@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import psycopg2
 import random
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -9,7 +10,11 @@ CORS(app)  # Enable CORS for all routes
 # Database connection setup
 def get_db_connection():
     conn = psycopg2.connect(
-        dbname="motd_db", user="postgres", password="password", host="localhost"
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("DB_HOST"),
+        port="5432"
     )
     return conn
 

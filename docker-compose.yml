@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: motd_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./server
+    environment:
+      FLASK_ENV: development
+      DB_HOST: db
+      DB_NAME: motd_db
+      DB_USER: postgres
+      DB_PASSWORD: password
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+  frontend:
+    image: nginx:latest
+    volumes:
+      - ./client:/usr/share/nginx/html
+    ports:
+      - "80:80"
