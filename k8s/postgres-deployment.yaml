@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres
+          image: balinwarren/cicd-assignment2-sample-project:postgres-v1.0
           env:
             - name: POSTGRES_DB
               value: motd_db

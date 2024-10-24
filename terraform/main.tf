@@ -62,6 +62,20 @@ resource "azurerm_network_security_rule" "allow_ssh" {
   network_security_group_name = azurerm_network_security_group.microk8s_nsg.name
 }
 
+resource "azurerm_network_security_rule" "allow_nodeport_30001" {
+  name                        = "allow_nodeport_30001"
+  priority                    = 101
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "30001"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.microk8s_rg.name
+  network_security_group_name = azurerm_network_security_group.microk8s_nsg.name
+}
+
 resource "azurerm_network_interface_security_group_association" "microk8s_nic_sg" {
   network_interface_id      = azurerm_network_interface.microk8s_nic.id
   network_security_group_id = azurerm_network_security_group.microk8s_nsg.id
