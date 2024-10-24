@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: localhost:32000/backend-image:v1.0
+          image: balinwarren/cicd-assignment2-sample-project:backend-v1.0
           ports:
             - containerPort: 5000
           env:
@@ -39,10 +39,10 @@ kind: Service
 metadata:
   name: backend
 spec:
-  type: NodePort # Change to NodePort if needed for external access
+  type: NodePort
   ports:
     - port: 5000
       targetPort: 5000
-      nodePort: 30002 # Optional, set a specific port for external access
+      nodePort: 30002
   selector:
     app: backend
