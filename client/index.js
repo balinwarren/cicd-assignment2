@@ -1,5 +1,5 @@
 function fetchMOTD() {
-    fetch('http://127.0.0.1:5000/motd')  // Replace this URL with your backend endpoint
+    fetch('http://172.27.92.214:30002/motd')  // Replace this URL with your backend endpoint
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
