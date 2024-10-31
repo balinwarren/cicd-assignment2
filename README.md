@@ -1,15 +1,16 @@
-Lab Manual: Building a CI/CD Pipeline with Docker, Terraform, Kubernetes, and Jenkins
-Overview
+# Lab Manual: Building a CI/CD Pipeline with Docker, Terraform, Kubernetes, and Jenkins
+## Overview
 
 This manual provides step-by-step instructions on setting up a CI/CD pipeline for deploying Docker containers using Terraform for infrastructure provisioning, MicroK8s Kubernetes for container orchestration, and Jenkins for automation. This setup deploys an application with a frontend and backend using Docker images.
-Prerequisites
 
-    Basic knowledge of Docker, Terraform, Kubernetes, and Jenkins.
-    GitHub account for source code and version control.
-    Docker Hub account for storing Docker images.
-    Azure account for creating virtual machines.
+## Prerequisites
 
-Steps
+- Basic knowledge of Docker, Terraform, Kubernetes, and Jenkins.
+- GitHub account for source code and version control.
+- Docker Hub account for storing Docker images.
+- Azure account for creating virtual machines.
+
+## Steps
 1. Set Up Docker Containers
 Step 1.1: Create Dockerfiles for Frontend and Backend and Database
 
@@ -19,20 +20,20 @@ Example Dockerfile:
 
 Dockerfile
 
-# Use an official base image
+### Use an official base image
 FROM node:14
 
-# Set working directory
+### Set working directory
 WORKDIR /app
 
-# Copy and install dependencies
+### Copy and install dependencies
 COPY . .
 RUN npm install
 
-# Expose application port
+### Expose application port
 EXPOSE 3000
 
-# Start the application
+### Start the application
 CMD ["npm", "start"]
 
 Step 1.2: Build and Push Docker Images to Docker Hub
@@ -227,6 +228,6 @@ Trigger the pipeline and ensure that it:
     Pulls code, builds, and pushes Docker images.
     Deploys the updated images to MicroK8s on the Azure VM.
 
-Conclusion
+## Conclusion
 
 This guide provides a step-by-step process to set up a CI/CD pipeline that builds, pushes, and deploys Docker containers to a Kubernetes environment on an Azure VM using Terraform and Jenkins.
