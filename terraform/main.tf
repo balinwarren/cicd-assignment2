@@ -106,7 +106,7 @@ resource "azurerm_linux_virtual_machine" "microk8s_vm" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub") # Make sure you have your SSH keys generated
+    public_key = file("~/.ssh/id_rsa.pub")
   }
 
   computer_name                   = "microk8s-vm"

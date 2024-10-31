@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        SSH_CREDENTIALS = 'azure-ssh-credentials'
+        FRONTEND_IMAGE = 'balinwarren/cicd-assignment2-sample-project:frontend-v1.0'
+        BACKEND_IMAGE = 'balinwarren/cicd-assignment2-sample-project:backend-v1.0'
+        POSTGRES_IMAGE = 'balinwarren/cicd-assignment2-sample-project:postgres-v1.0'
+        GITHUB_REPO = 'balinwarren/cicd-assignment2'
+        VM_IP = '57.154.188.73'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: "https://github.com/${GITHUB_REPO}.git"
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    // Build the frontend Docker image
+                    sh 'docker build -t ${FRONTEND_IMAGE} ./client'
+
+                    // Build the backend Docker image
+                    sh 'docker build -t ${BACKEND_IMAGE} ./server'
+                }
+            }
+        }
+
+        stage('Push Docker Images to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        // Push frontend image
+                        sh 'docker push ${FRONTEND_IMAGE}:latest'
+
+                        // Push backend image
+                        sh 'docker push ${BACKEND_IMAGE}:latest'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to MicroK8s on Azure VM') {
+            steps {
+                script {
+                    sshagent(credentials: [SSH_CREDENTIALS]) {
+                        sh """
+                        ssh -o StrictHostKeyChecking=no azureuser@${VM_IP} '
+                        docker pull ${FRONTEND_IMAGE}:latest &&
+                        docker pull ${BACKEND_IMAGE}:latest &&
+                        microk8s kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE} &&
+                        microk8s kubectl set image deployment/backend backend=${BACKEND_IMAGE}'
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed. Check the logs for more information.'
+        }
+    }
+}
