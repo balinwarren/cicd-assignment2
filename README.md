@@ -21,35 +21,35 @@ Example Dockerfile:
 Dockerfile
 
 ### Use an official base image
-FROM node:14
+    FROM node:14
 
 ### Set working directory
-WORKDIR /app
+    WORKDIR /app
 
 ### Copy and install dependencies
-COPY . .
-RUN npm install
+    COPY . .
+    RUN npm install
 
 ### Expose application port
-EXPOSE 3000
+    EXPOSE 3000
 
 ### Start the application
-CMD ["npm", "start"]
+    CMD ["npm", "start"]
 
 Step 1.2: Build and Push Docker Images to Docker Hub
 
-    Build the Docker images:
+Build the Docker images:
 
-    bash
+bash
 
-docker build -t your-dockerhub-username/your-app:frontend ./client
-docker build -t your-dockerhub-username/your-app:backend ./server
+    docker build -t your-dockerhub-username/your-app:frontend ./client
+    docker build -t your-dockerhub-username/your-app:backend ./server
 
 Log in to Docker Hub:
 
 bash
 
-docker login
+    docker login
 
 Push images to Docker Hub:
 
@@ -65,86 +65,86 @@ Step 2.1: Set Up Terraform Configuration
 
     hcl
 
-    provider "azurerm" {
-      features {}
-    }
-
-    resource "azurerm_resource_group" "microk8s_rg" {
-      name     = "microk8s_rg"
-      location = "West US"
-    }
-
-    resource "azurerm_virtual_network" "microk8s_vnet" {
-      name                = "microk8s_vnet"
-      address_space       = ["10.0.0.0/16"]
-      location            = azurerm_resource_group.microk8s_rg.location
-      resource_group_name = azurerm_resource_group.microk8s_rg.name
-    }
-
-    resource "azurerm_subnet" "microk8s_subnet" {
-      name                 = "microk8s_subnet"
-      resource_group_name  = azurerm_resource_group.microk8s_rg.name
-      virtual_network_name = azurerm_virtual_network.microk8s_vnet.name
-      address_prefixes     = ["10.0.1.0/24"]
-    }
-
-    resource "azurerm_public_ip" "microk8s_ip" {
-      name                = "microk8s_ip"
-      location            = azurerm_resource_group.microk8s_rg.location
-      resource_group_name = azurerm_resource_group.microk8s_rg.name
-      allocation_method   = "Static"
-    }
-
-    resource "azurerm_network_interface" "microk8s_nic" {
-      name                = "microk8s_nic"
-      location            = azurerm_resource_group.microk8s_rg.location
-      resource_group_name = azurerm_resource_group.microk8s_rg.name
-
-      ip_configuration {
-        name                          = "internal"
-        subnet_id                     = azurerm_subnet.microk8s_subnet.id
-        private_ip_address_allocation = "Dynamic"
-        public_ip_address_id          = azurerm_public_ip.microk8s_ip.id
-      }
-    }
-
-    resource "azurerm_linux_virtual_machine" "microk8s_vm" {
-      name                = "microk8s-vm"
-      resource_group_name = azurerm_resource_group.microk8s_rg.name
-      location            = azurerm_resource_group.microk8s_rg.location
-      size                = "Standard_B2s"
-      admin_username      = "azureuser"
-
-      network_interface_ids = [
-        azurerm_network_interface.microk8s_nic.id,
-      ]
-
-      os_disk {
-        caching              = "ReadWrite"
-        storage_account_type = "Standard_LRS"
-      }
-
-      source_image_reference {
-        publisher = "Canonical"
-        offer     = "UbuntuServer"
-        sku       = "18.04-LTS"
-        version   = "latest"
-      }
-
-      admin_ssh_key {
-        username   = "azureuser"
-        public_key = file("~/.ssh/id_rsa.pub")
-      }
-
-      computer_name  = "microk8s-vm"
-      disable_password_authentication = true
-    }
+        provider "azurerm" {
+          features {}
+        }
+    
+        resource "azurerm_resource_group" "microk8s_rg" {
+          name     = "microk8s_rg"
+          location = "West US"
+        }
+    
+        resource "azurerm_virtual_network" "microk8s_vnet" {
+          name                = "microk8s_vnet"
+          address_space       = ["10.0.0.0/16"]
+          location            = azurerm_resource_group.microk8s_rg.location
+          resource_group_name = azurerm_resource_group.microk8s_rg.name
+        }
+    
+        resource "azurerm_subnet" "microk8s_subnet" {
+          name                 = "microk8s_subnet"
+          resource_group_name  = azurerm_resource_group.microk8s_rg.name
+          virtual_network_name = azurerm_virtual_network.microk8s_vnet.name
+          address_prefixes     = ["10.0.1.0/24"]
+        }
+    
+        resource "azurerm_public_ip" "microk8s_ip" {
+          name                = "microk8s_ip"
+          location            = azurerm_resource_group.microk8s_rg.location
+          resource_group_name = azurerm_resource_group.microk8s_rg.name
+          allocation_method   = "Static"
+        }
+    
+        resource "azurerm_network_interface" "microk8s_nic" {
+          name                = "microk8s_nic"
+          location            = azurerm_resource_group.microk8s_rg.location
+          resource_group_name = azurerm_resource_group.microk8s_rg.name
+    
+          ip_configuration {
+            name                          = "internal"
+            subnet_id                     = azurerm_subnet.microk8s_subnet.id
+            private_ip_address_allocation = "Dynamic"
+            public_ip_address_id          = azurerm_public_ip.microk8s_ip.id
+          }
+        }
+    
+        resource "azurerm_linux_virtual_machine" "microk8s_vm" {
+          name                = "microk8s-vm"
+          resource_group_name = azurerm_resource_group.microk8s_rg.name
+          location            = azurerm_resource_group.microk8s_rg.location
+          size                = "Standard_B2s"
+          admin_username      = "azureuser"
+    
+          network_interface_ids = [
+            azurerm_network_interface.microk8s_nic.id,
+          ]
+    
+          os_disk {
+            caching              = "ReadWrite"
+            storage_account_type = "Standard_LRS"
+          }
+    
+          source_image_reference {
+            publisher = "Canonical"
+            offer     = "UbuntuServer"
+            sku       = "18.04-LTS"
+            version   = "latest"
+          }
+    
+          admin_ssh_key {
+            username   = "azureuser"
+            public_key = file("~/.ssh/id_rsa.pub")
+          }
+    
+          computer_name  = "microk8s-vm"
+          disable_password_authentication = true
+        }
 
 Step 2.2: Apply Terraform Configuration
 
-    Initialize and apply Terraform configuration:
+Initialize and apply Terraform configuration:
 
-    bash
+bash
 
     terraform init
     terraform apply
@@ -154,17 +154,17 @@ Step 2.2: Apply Terraform Configuration
 3. Install MicroK8s and Deploy Kubernetes Resources
 Step 3.1: SSH into Azure VM and Install MicroK8s
 
-    SSH into your Azure VM:
+SSH into your Azure VM:
 
-    bash
+bash
 
-ssh azureuser@<VM_PUBLIC_IP>
+    ssh azureuser@<VM_PUBLIC_IP>
 
 Install MicroK8s:
 
 bash
 
-sudo snap install microk8s --classic
+    sudo snap install microk8s --classic
 
 Add MicroK8s User to Docker Group:
 
@@ -175,10 +175,10 @@ bash
 
 Step 3.2: Transfer and Apply Kubernetes YAML Files
 
-    Copy Kubernetes YAML files for your application to the Azure VM.
-    Apply the YAML files:
+Copy Kubernetes YAML files for your application to the Azure VM.
+Apply the YAML files:
 
-    bash
+bash
 
     microk8s kubectl apply -f frontend-deployment.yaml
     microk8s kubectl apply -f backend-deployment.yaml
@@ -191,42 +191,42 @@ Step 4.1: Install Jenkins Locally and Configure Credentials
 
 Step 4.2: Create a Jenkins Pipeline
 
-    Create a new pipeline job in Jenkins.
-    Define a Jenkinsfile with the following stages:
-        Checkout Code: Pulls latest code from GitHub.
-        Build Docker Images: Builds frontend and backend Docker images.
-        Push Docker Images: Pushes images to Docker Hub.
-        Deploy to Azure VM: SSHs into the VM to update the MicroK8s deployments.
+Create a new pipeline job in Jenkins.
+Define a Jenkinsfile with the following stages:
+    Checkout Code: Pulls latest code from GitHub.
+    Build Docker Images: Builds frontend and backend Docker images.
+    Push Docker Images: Pushes images to Docker Hub.
+    Deploy to Azure VM: SSHs into the VM to update the MicroK8s deployments.
 
 Example Jenkinsfile snippet:
 
 groovy
 
-pipeline {
-    agent any
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        SSH_CREDENTIALS = 'azure-ssh-credentials'
-        FRONTEND_IMAGE = 'your-dockerhub-username/frontend-basic'
-        BACKEND_IMAGE = 'your-dockerhub-username/backend-image'
-        GITHUB_REPO = 'your-github-username/your-repo-name'
-        VM_IP = '<VM_PUBLIC_IP>'
+    pipeline {
+        agent any
+        environment {
+            DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+            SSH_CREDENTIALS = 'azure-ssh-credentials'
+            FRONTEND_IMAGE = 'your-dockerhub-username/frontend-basic'
+            BACKEND_IMAGE = 'your-dockerhub-username/backend-image'
+            GITHUB_REPO = 'your-github-username/your-repo-name'
+            VM_IP = '<VM_PUBLIC_IP>'
+        }
+    
+        stages {
+            stage('Checkout Code') { steps { git url: "https://github.com/${GITHUB_REPO}.git" } }
+            stage('Build Docker Images') { steps { /* build steps here */ } }
+            stage('Push Docker Images') { steps { /* push steps here */ } }
+            stage('Deploy to MicroK8s') { steps { /* SSH and kubectl set image commands */ } }
+        }
     }
-
-    stages {
-        stage('Checkout Code') { steps { git url: "https://github.com/${GITHUB_REPO}.git" } }
-        stage('Build Docker Images') { steps { /* build steps here */ } }
-        stage('Push Docker Images') { steps { /* push steps here */ } }
-        stage('Deploy to MicroK8s') { steps { /* SSH and kubectl set image commands */ } }
-    }
-}
 
 Step 4.3: Test the Pipeline
 
 Trigger the pipeline and ensure that it:
 
-    Pulls code, builds, and pushes Docker images.
-    Deploys the updated images to MicroK8s on the Azure VM.
+Pulls code, builds, and pushes Docker images.
+Deploys the updated images to MicroK8s on the Azure VM.
 
 ## Conclusion
 
